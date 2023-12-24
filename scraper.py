@@ -3,7 +3,7 @@ from datetime import datetime
 
 fh = datetime.now().strftime("%d-%m-%YT%H:%M:%S")
 linea = 12
-sentido = 1
+#sentido = 1
 
 HOST = "https://reddelineas.tussam.es/API/infotus-ui"
 
@@ -37,7 +37,7 @@ def formarVertices():
         for sentido in linea["destinos"]:
             paradas = obtenerParadasLinea(linea["linea"],sentido["sentido"])
             for parada in paradas:
-                vertice = Vertice(codigo=linea["labelLinea"],
+                vertice = Vertice(codigo=parada["codigo"],
                                   coordenadas=(parada["posicion"]["latitudE6"],parada["posicion"]["longitudE6"]),
                                   nombre=parada["descripcion"]["texto"])
                 print(vertice)
@@ -72,6 +72,9 @@ class Vertice:
 
     def __str__(self):
         return f"Parada: {self.nombre} Codigo: {self.codigo} Coordenadas: {self.coordenadas}"
+    
+    def __write__(self):
+        return f"{self.codigo}, {self.nombre.replace(',','')}, {self.coordenadas}"
 
 class Arista:
     linea: int
@@ -87,6 +90,9 @@ class Arista:
 
     def __str__(self):
         return f"Linea: {self.linea} Origen: {self.origen} Destino: {self.destino} Distancia: {self.distancia}"
+    
+    def __write__(self):
+        return f"{self.origen}, {self.destino}, {self.linea}, {self.distancia}"
 
 
 vertices = formarVertices()
@@ -97,10 +103,10 @@ print(f"Vertices: {len(vertices)}")
 print(f"Aristas: {len(aristas)}")
 
 with open("db.txt","w", encoding='utf-8') as file:
-    file.write("--VERTICES--")
+    file.write("#VERTEX#")
     for vertex in vertices:
-        file.write(f"\n{vertex.__str__()}")
+        file.write(f"\n{vertex.__write__()}")
 
-    file.write("\n--ARISTAS--")
+    file.write("\n#EDGE#")
     for edge in aristas:
-        file.write(f"\n{edge.__str__()}")
+        file.write(f"\n{edge.__write__()}")
